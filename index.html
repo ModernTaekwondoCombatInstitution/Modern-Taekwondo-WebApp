@@ -186,6 +186,23 @@
   .done .big svg{stroke:var(--gold)}
   .done p{color:var(--muted)}
 
+  /* ---------- signed-in bar + admin ---------- */
+  [hidden]{display:none!important}
+  .acts{display:flex;align-items:center;gap:10px}
+  .gem{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--line);border-radius:999px;padding:5px 13px 5px 10px;background:rgba(255,201,40,.08);color:var(--gold2);font-weight:600;font-size:15px;white-space:nowrap}
+  .me .nm{color:var(--muted);font-size:14px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:4px}
+  .ah{font-size:19px;color:var(--gold2);margin:24px 0 10px;display:flex;align-items:center;gap:8px;font-weight:600}
+  .cnt{font-size:12px;border:1.5px solid var(--line);border-radius:999px;padding:1px 9px;color:var(--gold)}
+  .list{display:flex;flex-direction:column;gap:10px}
+  .arow{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1.5px solid var(--line);border-radius:14px;padding:12px 14px}
+  .arow .who{min-width:0}
+  .arow .who b{display:block;font-size:17px;color:var(--text);font-weight:500}
+  .arow .who span{display:block;color:var(--muted);font-size:13.5px;overflow-wrap:anywhere}
+  .arow .btn{padding:7px 14px;font-size:14px}
+  .empty{color:var(--muted);font-size:14px;padding:4px 2px}
+  .amsg{color:var(--gold2);font-size:14px}
+
   /* ---------- phone / tablet ---------- */
   @media (max-width:899px){
     .burger{display:flex}
@@ -197,6 +214,7 @@
     .btn{padding:8px 13px;font-size:15px}
     .btn.play{padding:12px 26px}
   }
+  @media (max-width:600px){.me .nm{display:none}}
   @media (max-width:480px){
     .brand small{display:none}
     .brand b{font-size:14px}
@@ -220,8 +238,15 @@
     <span><b>Modern Taekwondo</b><small>Combat Institution</small></span>
   </a>
   <span class="spacer"></span>
-  <button class="btn ghost" id="openLogin">Sign in</button>
-  <button class="btn gold" id="openSignup">Sign up</button>
+  <span class="acts" id="guest">
+    <button class="btn ghost" id="openLogin">Sign in</button>
+    <button class="btn gold" id="openSignup">Sign up</button>
+  </span>
+  <span class="acts me" id="me" hidden>
+    <span class="gem" title="Your diamonds"><svg width="18" height="18" viewBox="0 0 24 24" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z" fill="#ffc928" stroke="#a87000" stroke-width="1.4"/><path d="M2 9h20M9 3l-2 6 5 12M15 3l2 6-5 12" fill="none" stroke="#a87000" stroke-width="1.1"/></svg><b id="gemN">0</b></span>
+    <span class="nm" id="meName"></span>
+    <button class="btn ghost" id="signOut">Sign out</button>
+  </span>
 </header>
 
 <div class="scrim" id="scrim"></div>
@@ -232,6 +257,7 @@
   <button class="nav" data-go="games"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="7" width="19" height="11" rx="5"/><path d="M7.5 10.5v4M5.5 12.5h4"/><circle cx="15.5" cy="11.5" r=".8" fill="currentColor"/><circle cx="18" cy="13.5" r=".8" fill="currentColor"/></svg>Games</button>
   <button class="nav" data-go="shop"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>MT Shop</button>
   <button class="nav" data-go="more"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg>More</button>
+  <button class="nav" data-go="admin" id="navAdmin" hidden><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5L15.5 10"/></svg>Admin</button>
   <div class="sideFoot">Modern Taekwondo Combat Institution<br>Malacca, Malaysia</div>
 </nav>
 
@@ -343,6 +369,25 @@
     </div>
   </section>
 
+  <!-- ================= ADMIN ================= -->
+  <section class="view page" id="v-admin">
+    <h2 class="t">Admin</h2>
+    <p class="sub">Approve sign-up requests and look after your members.</p>
+    <div class="toolbar">
+      <button class="btn ghost" id="admRefresh">Refresh</button>
+      <button class="btn ghost" id="admExport">Export members (CSV)</button>
+      <span class="amsg" id="admMsg"></span>
+    </div>
+    <h3 class="ah">Requests <span class="cnt" id="cntReq">0</span></h3>
+    <div class="list" id="admReq"></div>
+    <h3 class="ah">Members <span class="cnt" id="cntMem">0</span></h3>
+    <div class="list" id="admMem"></div>
+    <h3 class="ah">Declined or blocked <span class="cnt" id="cntRej">0</span></h3>
+    <div class="list" id="admRej"></div>
+    <h3 class="ah">Game activity</h3>
+    <div class="card"><p>Scores and diamonds earned will appear here once the games are connected.</p></div>
+  </section>
+
   <footer>&copy; Modern Taekwondo Combat Institution</footer>
 </main>
 
@@ -362,13 +407,14 @@
         <div class="f"><label for="suPass">Password</label><div class="pw"><input type="password" id="suPass" autocomplete="new-password"><button type="button" data-show="suPass">Show</button></div><div class="err"></div></div>
         <div class="cap">Captcha check will appear here</div>
         <button class="btn gold lg full" type="submit">Send request</button>
+        <div class="err" id="suMsg" style="margin-top:8px;text-align:center"></div>
         <div class="row2"><span>Already have an account?</span><button class="link" type="button" id="toLogin">Sign in</button></div>
       </form>
     </div>
     <div class="done" id="suDone">
       <div class="big"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>
-      <h2>Almost there</h2>
-      <p>This is a preview. Accounts will work once the club server is connected, so nothing was sent yet.</p>
+      <h2>Request sent</h2>
+      <p>Your request was sent. Your coach will check it and approve your account. You can sign in after that.</p>
       <button class="btn gold full" data-close>Close</button>
     </div>
   </div>
@@ -390,12 +436,6 @@
         <div class="row2"><button class="link" type="button" id="forgot">Forgot password?</button><button class="link" type="button" id="toSignup">Create an account</button></div>
         <div class="err" id="liMsg" style="margin-top:8px;color:var(--gold2)"></div>
       </form>
-    </div>
-    <div class="done" id="liDone">
-      <div class="big"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>
-      <h2>Preview only</h2>
-      <p>Sign in will work once the club server is connected.</p>
-      <button class="btn gold full" data-close>Close</button>
     </div>
   </div>
 </div>
@@ -434,16 +474,19 @@
   document.querySelectorAll('.ico svg').forEach(function(s){ s.setAttribute('stroke', '#ffc928'); });
 
   /* ---------- navigation ---------- */
-  var VIEWS = ['home', 'achievements', 'about', 'games', 'shop', 'more'];
+  var VIEWS = ['home', 'achievements', 'about', 'games', 'shop', 'more', 'admin'];
   function go(name, push){
     if (VIEWS.indexOf(name) < 0) name = 'home';
+    if (name === 'admin' && !document.body.classList.contains('is-admin')) name = 'home';
     VIEWS.forEach(function(v){ $('v-' + v).classList.toggle('on', v === name); });
     document.querySelectorAll('.nav').forEach(function(n){ n.classList.toggle('on', n.getAttribute('data-go') === name); });
     document.body.classList.remove('menu');
     $('burger').setAttribute('aria-expanded', 'false');
     if (push !== false) { try { history.replaceState(null, '', '#' + name); } catch (e) {} }
     window.scrollTo(0, 0);
+    document.dispatchEvent(new CustomEvent('mt:view', { detail: name }));
   }
+  window.MTUI = { go: go, closeModals: function(){ closeModals(); }, openModal: function(id){ openModal(id); } };
   document.querySelectorAll('[data-go]').forEach(function(el){
     el.addEventListener('click', function(e){ e.preventDefault(); go(el.getAttribute('data-go')); });
   });
@@ -510,7 +553,7 @@
     $(id).classList.add('on');
     document.body.classList.remove('menu');
     $('suForm').style.display = ''; $('suDone').classList.remove('on');
-    $('liForm').style.display = ''; $('liDone').classList.remove('on');
+    $('liMsg').textContent = ''; $('suMsg').textContent = '';
     var first = $(id).querySelector('input'); if (first) setTimeout(function(){ first.focus(); }, 50);
   }
   function closeModals(){
@@ -540,12 +583,22 @@
     ev.preventDefault();
     var ok = true;
     ok = setErr($('suName'), $('suName').value.trim().length < 2 ? "Please type the student's full name." : '') && ok;
-    ok = setErr($('suUser'), !/^[a-z0-9._]{3,20}$/i.test($('suUser').value.trim()) ? 'Use 3 to 20 letters or numbers, no spaces.' : '') && ok;
+    ok = setErr($('suUser'), !/^[a-z0-9_]{3,20}$/i.test($('suUser').value.trim()) ? 'Use 3 to 20 letters, numbers or _ (no spaces).' : '') && ok;
     ok = setErr($('suSchool'), $('suSchool').value.trim().length < 2 ? 'Please type the school name.' : '') && ok;
     ok = setErr($('suPass'), $('suPass').value.length < 6 ? 'Use at least 6 characters.' : '') && ok;
     if (!ok) return;
-    /* STAGE 2: this is where the request will be saved to Firebase */
-    $('suForm').style.display = 'none'; $('suDone').classList.add('on');
+    var btn = ev.target.querySelector('[type=submit]');
+    if (!window.MT) { $('suMsg').textContent = 'Cannot reach the club server. Check your internet and try again.'; return; }
+    btn.disabled = true; btn.textContent = 'Please wait...'; $('suMsg').textContent = '';
+    window.MT.signup({
+      fullName: $('suName').value.trim(), username: $('suUser').value.trim(), parentName: $('suParent').value.trim(),
+      school: $('suSchool').value.trim(), isMember: $('suMember').checked, password: $('suPass').value
+    }).then(function(){
+      $('suForm').style.display = 'none'; $('suDone').classList.add('on'); $('fSignup').reset();
+    }).catch(function(e){
+      var m = window.MT.explain(e);
+      if (m.field === 'user') setErr($('suUser'), m.text); else $('suMsg').textContent = m.text;
+    }).then(function(){ btn.disabled = false; btn.textContent = 'Send request'; });
   });
   $('fLogin').addEventListener('submit', function(ev){
     ev.preventDefault();
@@ -553,13 +606,172 @@
     ok = setErr($('liUser'), $('liUser').value.trim().length < 3 ? 'Please type your username.' : '') && ok;
     ok = setErr($('liPass'), $('liPass').value.length < 1 ? 'Please type your password.' : '') && ok;
     if (!ok) return;
-    /* STAGE 2: this is where sign in will check Firebase */
-    $('liForm').style.display = 'none'; $('liDone').classList.add('on');
+    var btn = ev.target.querySelector('[type=submit]');
+    if (!window.MT) { $('liMsg').textContent = 'Cannot reach the club server. Check your internet and try again.'; return; }
+    btn.disabled = true; btn.textContent = 'Please wait...'; $('liMsg').textContent = '';
+    window.MT.login($('liUser').value.trim(), $('liPass').value, $('liRemember').checked).then(function(r){
+      if (r.ok) { $('fLogin').reset(); closeModals(); } else { $('liMsg').textContent = r.text; }
+    }).catch(function(e){ $('liMsg').textContent = window.MT.explain(e).text; })
+    .then(function(){ btn.disabled = false; btn.textContent = 'Sign in'; });
   });
   $('forgot').addEventListener('click', function(){
-    $('liMsg').textContent = 'Password reset will work once the club server is connected. For now, ask your coach.';
+    $('liMsg').textContent = 'Please ask your coach. They will help you set a new password.';
   });
 })();
+</script>
+
+<script type="module">
+/* ======================================================================
+   FIREBASE (free Spark plan): sign up, sign in, member approval, admin page
+   ====================================================================== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, deleteUser, onAuthStateChanged,
+         setPersistence, browserLocalPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, getDocs, updateDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD5PPHVQJTSwpgp3n7Pzg1ho-QvkWynedE",
+  authDomain: "modern-taekwondo.firebaseapp.com",
+  projectId: "modern-taekwondo",
+  storageBucket: "modern-taekwondo.firebasestorage.app",
+  messagingSenderId: "445641799573",
+  appId: "1:445641799573:web:aae2d94a0a37f5321d689c"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const $ = (id) => document.getElementById(id);
+const toEmail = (u) => u.trim().toLowerCase() + '@modern-tkd.app';   // members use a username; Firebase needs an email-shaped name
+let busy = false;       // true while sign up / sign in is running, so the listener does not interfere
+let current = null;     // { uid, profile } of the signed-in approved member
+
+function explain(e){
+  const c = (e && e.code) || '';
+  if (c === 'auth/email-already-in-use') return { field: 'user', text: 'That username is already taken. Please choose another one.' };
+  if (c === 'auth/invalid-credential' || c === 'auth/user-not-found' || c === 'auth/wrong-password' || c === 'auth/invalid-login-credentials') return { text: 'Wrong username or password.' };
+  if (c === 'auth/too-many-requests') return { text: 'Too many tries. Please wait a few minutes and try again.' };
+  if (c === 'auth/network-request-failed' || c === 'unavailable') return { text: 'No internet connection. Please try again.' };
+  if (c === 'auth/weak-password') return { text: 'Password is too weak. Use at least 6 characters.' };
+  if (c === 'permission-denied') return { text: 'The club server is not ready yet. Please tell your coach.' };
+  return { text: 'Something went wrong (' + (c || 'unknown') + '). Please try again.' };
+}
+
+async function signup(d){
+  busy = true; let cred = null;
+  try {
+    cred = await createUserWithEmailAndPassword(auth, toEmail(d.username), d.password);
+    await setDoc(doc(db, 'users', cred.user.uid), {
+      username: d.username.trim().toLowerCase(), fullName: d.fullName, parentName: d.parentName || '', school: d.school,
+      isMember: !!d.isMember, status: 'pending', role: 'student', diamonds: 0, createdAt: serverTimestamp()
+    });
+    await signOut(auth);
+  } catch (e) {
+    if (cred && cred.user) { try { await deleteUser(cred.user); } catch (_) { try { await signOut(auth); } catch (__) {} } }
+    throw e;
+  } finally { busy = false; }
+}
+
+async function login(username, pass, remember){
+  busy = true;
+  try {
+    await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
+    const cred = await signInWithEmailAndPassword(auth, toEmail(username), pass);
+    const s = await getDoc(doc(db, 'users', cred.user.uid));
+    const p = s.exists() ? s.data() : null;
+    if (!p || p.status === 'pending') { await signOut(auth); return { ok: false, text: 'Your request is still waiting for approval. Please try again after your coach approves it.' }; }
+    if (p.status !== 'approved') { await signOut(auth); return { ok: false, text: 'This account is not active. Please ask your coach.' }; }
+    applyUser(cred.user, p);
+    return { ok: true };
+  } finally { busy = false; }
+}
+
+async function logout(){ await signOut(auth); applyUser(null); }
+
+function applyUser(user, p){
+  current = user ? { uid: user.uid, profile: p } : null;
+  const admin = !!(p && p.role === 'admin');
+  $('guest').hidden = !!user; $('me').hidden = !user;
+  document.body.classList.toggle('is-admin', admin);
+  $('navAdmin').hidden = !admin;
+  if (user) { $('meName').textContent = (p.fullName || p.username || '').split(' ')[0]; $('gemN').textContent = String(p.diamonds || 0); }
+  if (!admin && $('v-admin').classList.contains('on') && window.MTUI) window.MTUI.go('home');
+  if (admin && $('v-admin').classList.contains('on')) loadAdmin();
+}
+
+onAuthStateChanged(auth, async (user) => {         // keeps members signed in after a page refresh
+  if (busy) return;
+  if (!user) { applyUser(null); return; }
+  try {
+    const s = await getDoc(doc(db, 'users', user.uid));
+    const p = s.exists() ? s.data() : null;
+    if (p && p.status === 'approved') applyUser(user, p); else { applyUser(null); await signOut(auth); }
+  } catch (e) { applyUser(null); }
+});
+
+$('signOut').addEventListener('click', logout);
+
+/* ---------------- admin page ---------------- */
+let members = [];
+function el(tag, cls, text){ const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function row(m, buttons){
+  const r = el('div', 'arow'), w = el('div', 'who');
+  w.appendChild(el('b', '', m.fullName || m.username));
+  const bits = ['@' + m.username, m.school || '', m.parentName ? 'Parent: ' + m.parentName : '', m.isMember ? 'Club member' : 'Not a member yet'];
+  if (m.status === 'approved') bits.push(String(m.diamonds || 0) + ' diamonds');
+  w.appendChild(el('span', '', bits.filter(Boolean).join('  ·  ')));
+  r.appendChild(w);
+  const a = el('div', 'acts');
+  buttons.forEach(function(b){
+    const btn = el('button', 'btn ' + b.cls, b.label);
+    btn.addEventListener('click', function(){ setStatus(m, b.to, btn); });
+    a.appendChild(btn);
+  });
+  r.appendChild(a);
+  return r;
+}
+async function setStatus(m, to, btn){
+  btn.disabled = true;
+  try { await updateDoc(doc(db, 'users', m.uid), { status: to }); m.status = to; renderAdmin(); $('admMsg').textContent = ''; }
+  catch (e) { btn.disabled = false; $('admMsg').textContent = explain(e).text; }
+}
+function fill(id, cntId, list, make, emptyText){
+  const box = $(id); box.textContent = '';
+  $(cntId).textContent = String(list.length);
+  if (!list.length) { box.appendChild(el('div', 'empty', emptyText)); return; }
+  list.forEach(function(m){ box.appendChild(make(m)); });
+}
+function renderAdmin(){
+  const by = (s) => members.filter(function(m){ return m.status === s; });
+  fill('admReq', 'cntReq', by('pending'), (m) => row(m, [{ label: 'Approve', cls: 'gold', to: 'approved' }, { label: 'Decline', cls: 'ghost', to: 'rejected' }]), 'No new requests.');
+  fill('admMem', 'cntMem', by('approved'), (m) => row(m, m.role === 'admin' ? [] : [{ label: 'Block', cls: 'ghost', to: 'rejected' }]), 'No approved members yet.');
+  fill('admRej', 'cntRej', by('rejected'), (m) => row(m, [{ label: 'Approve', cls: 'gold', to: 'approved' }]), 'Nobody here.');
+}
+async function loadAdmin(){
+  if (!current || current.profile.role !== 'admin') return;
+  $('admMsg').textContent = 'Loading...';
+  try {
+    const snap = await getDocs(collection(db, 'users'));
+    members = snap.docs.map(function(d){ const x = d.data(); x.uid = d.id; return x; });
+    members.sort(function(a, b){ return String(a.fullName || '').localeCompare(String(b.fullName || '')); });
+    renderAdmin(); $('admMsg').textContent = '';
+  } catch (e) { $('admMsg').textContent = explain(e).text; }
+}
+$('admRefresh').addEventListener('click', loadAdmin);
+document.addEventListener('mt:view', function(ev){ if (ev.detail === 'admin') loadAdmin(); });
+$('admExport').addEventListener('click', function(){
+  const safe = (v) => { v = String(v == null ? '' : v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
+  const head = ['Full name', 'Username', 'Parent', 'School', 'Club member', 'Status', 'Diamonds'];
+  const lines = [head.map(safe).join(',')].concat(members.map(function(m){
+    return [m.fullName, m.username, m.parentName, m.school, m.isMember ? 'Yes' : 'No', m.status, m.diamonds || 0].map(safe).join(',');
+  }));
+  const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'modern-taekwondo-members.csv';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+});
+
+/* The games will use this later to add diamonds */
+window.MT = { signup: signup, login: login, logout: logout, explain: explain, user: function(){ return current; }, db: db };
 </script>
 </body>
 </html>
