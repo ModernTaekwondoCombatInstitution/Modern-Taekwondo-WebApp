@@ -1066,7 +1066,7 @@ const firebaseConfig = {
 };
 /* Photo upload (Cloudinary, free) and the password-reset helper (Cloudflare Worker, free) */
 const CLOUD_NAME = 'w5vrf7vt', CLOUD_PRESET = 'modern-webapp-img';
-const RESET_URL = '';          // paste your Cloudflare Worker address here after you set it up, for example https://mt-reset.yourname.workers.dev
+const RESET_URL = 'https://mt-reset.moderntaekwondo123.workers.dev';          // paste your Cloudflare Worker address here after you set it up, for example https://mt-reset.yourname.workers.dev
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
